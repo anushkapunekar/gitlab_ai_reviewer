@@ -23,3 +23,20 @@ def review_merge_request(changes: dict) -> dict:
         "deletions": deletions,
         "verdict": "Initial review completed"
     }
+
+
+def format_review_comment(review: dict) -> str:
+    """
+    Converts review dict into a human-readable GitLab MR comment.
+    """
+    return f"""
+🤖 **AI Code Review**
+
+**Files Changed:** {", ".join(review["files_changed"])}
+**Total Files:** {review["total_files"]}
+**Additions:** {review["additions"]}
+**Deletions:** {review["deletions"]}
+
+📝 **Verdict:**  
+{review["verdict"]}
+"""

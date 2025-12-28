@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Request
+from app.services.mr_service import handle_merge_request
 
 router = APIRouter(prefix="/webhooks", tags=["gitlab"])
 
@@ -6,11 +7,14 @@ router = APIRouter(prefix="/webhooks", tags=["gitlab"])
 async def gitlab_webhook(request: Request):
     payload = await request.json()
 
-    event_type = payload.get("object_kind")
+    if payload.get("object_kind") == "merge_request":
+        review = handle_merge_request(payload)
+        print("🧠 AI REVIEW RESULT:")
+        print(review)
 
-    if event_type == "merge_request":
-        print("✅ Merge Request event received")
-    else:
-        print("ℹ️ Non-MR event received:", event_type)
+        return {
+            "status": "processed",
+            "review": review
+        }
 
-    return {"status": "received", "event": event_type}
+    return {"status": "ignored"}
