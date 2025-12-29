@@ -139,10 +139,12 @@ def multi_agent_review(changes: dict) -> str:
     performance = performance_review_agent(diffs_text)
     style = style_review_agent(diffs_text)
 
+    scoring = scoring_agent(summary, security, performance, style)
+
     return f"""
 🤖 **AI Code Review (Multi-Agent)**
 
-## General Summary
+## 🧾 General Summary
 {summary}
 
 ## 🔐 Security Review
@@ -153,4 +155,51 @@ def multi_agent_review(changes: dict) -> str:
 
 ## 🎨 Code Style Review
 {style}
+
+## 🧮 Final Assessment
+{scoring}
 """
+
+
+def scoring_agent(summary: str, security: str, performance: str, style: str) -> str:
+    client = get_groq_client()
+
+    prompt = f"""
+You are a tech lead deciding whether a Merge Request should be merged.
+
+Based on the following reviews, do two things:
+1. Give an overall code quality score out of 10 (decimal allowed)
+2. Decide a verdict: PASS or FAIL
+
+Rules:
+- FAIL if there are serious security risks or critical bugs
+- PASS otherwise
+
+Respond in EXACT format:
+
+Score: <number>/10
+Verdict: <PASS or FAIL>
+
+Reviews:
+--- Summary ---
+{summary}
+
+--- Security ---
+{security}
+
+--- Performance ---
+{performance}
+
+--- Style ---
+{style}
+"""
+
+    response = client.chat.completions.create(
+        model="llama-3.1-8b-instant",
+        messages=[{"role": "user", "content": prompt}],
+        temperature=0.1
+    )
+
+    return response.choices[0].message.content
+
+
