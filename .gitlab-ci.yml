@@ -11,7 +11,7 @@ ai_code_review:
   script:
     - echo "Running AI Code Review..."
     - |
-      curl -f -X POST http://YOUR_BACKEND_URL/ci/ai-review \
+      curl -f -X POST https://gitlab-ai-reviewer.onrender.com/ci/ai-review \
         -H "Content-Type: application/json" \
         -d "{
           \"object_kind\": \"merge_request\",
