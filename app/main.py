@@ -5,6 +5,7 @@ from app.gitlab.client import GitLabClient
 from app.agent.reviewer import multi_agent_review
 from app.webhooks.gitlab import router as gitlab_webhook_router
 from app.auth.gitlab_oauth import router as gitlab_auth_router
+from app.ci.ai_review import router as ci_router
 
 load_dotenv()
 
@@ -13,6 +14,7 @@ app = FastAPI(title="GitLab AI Reviewer")
 # ✅ THIS is the correct way
 app.include_router(gitlab_webhook_router)
 app.include_router(gitlab_auth_router)
+app.include_router(ci_router)
 
 @app.get("/")
 def health_check():

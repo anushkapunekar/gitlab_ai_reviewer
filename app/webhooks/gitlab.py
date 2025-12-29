@@ -8,7 +8,7 @@ async def gitlab_webhook(request: Request):
     payload = await request.json()
 
     if payload.get("object_kind") == "merge_request":
-        review = handle_merge_request(payload)
+        review = handle_merge_request(payload, post_comment=True)
         print("🧠 AI REVIEW RESULT:")
         print(review)
 

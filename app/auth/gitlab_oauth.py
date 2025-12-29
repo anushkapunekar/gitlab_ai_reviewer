@@ -2,6 +2,7 @@ import os
 import requests
 from fastapi import APIRouter
 from fastapi.responses import RedirectResponse
+from app.auth.token_store import gitlab_token_store
 
 router = APIRouter(prefix="/auth/gitlab", tags=["auth"])
 
@@ -38,4 +39,12 @@ def gitlab_callback(code: str):
     response = requests.post(GITLAB_TOKEN_URL, data=data)
     response.raise_for_status()
 
-    return response.json()
+    token_data = response.json()
+
+    # TEMP: store single-user token
+    gitlab_token_store["default_user"] = token_data["access_token"]
+
+    return {
+        "message": "GitLab OAuth successful",
+        "stored_for_user": "default_user"
+    }
