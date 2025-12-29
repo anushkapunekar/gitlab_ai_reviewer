@@ -34,3 +34,26 @@ def test_mr():
     review = multi_agent_review(changes)
 
     return review
+
+@app.post("/debug/post-review")
+async def debug_post_review(project_id: int, mr_iid: int):
+    token = gitlab_token_store.get("default_user")
+    if not token:
+        return {"error": "Please login first via /auth/gitlab/login"}
+
+    client = GitLabClient(token)
+
+    # 🔴 REAL MR DIFF IS FETCHED HERE
+    changes = client.get_merge_request_changes(project_id, mr_iid)
+
+    # 🔴 REAL AI REVIEW BASED ON DIFF
+    review_text = multi_agent_review(changes)
+
+    # 🔴 REAL COMMENT POSTED TO GITLAB MR
+    client.post_merge_request_comment(
+        project_id=project_id,
+        mr_iid=mr_iid,
+        comment=review_text
+    )
+
+    return {"status": "comment_posted"}
