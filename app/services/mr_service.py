@@ -1,6 +1,6 @@
 import os
 from app.gitlab.client import GitLabClient
-from app.agent.reviewer import review_merge_request, format_review_comment
+from app.agent.reviewer import review_merge_request_llm
 
 def handle_merge_request(payload: dict) -> dict:
     project_id = payload["project"]["id"]
@@ -11,9 +11,14 @@ def handle_merge_request(payload: dict) -> dict:
 
     changes = client.get_merge_request_changes(project_id, mr_iid)
 
-    review = review_merge_request(changes)
-    comment = format_review_comment(review)
+    # ✅ DEFINE the variable
+    review_text = review_merge_request_llm(changes)
 
-    client.post_merge_request_comment(project_id, mr_iid, comment)
+    # ✅ USE the same variable
+    client.post_merge_request_comment(
+        project_id,
+        mr_iid,
+        review_text
+    )
 
-    return review
+    return {"status": "review_posted"}
